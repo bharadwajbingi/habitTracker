@@ -97,11 +97,30 @@
       const checkboxes = dayBox.querySelectorAll('input[type="checkbox"]');
       const completedTasks = Array.from(checkboxes).filter(cb => cb.checked).length;
       dayBox.classList.toggle('completed', completedTasks === checkboxes.length);
-      trackerData[day] = completedTasks === checkboxes.length;
+
+      // Save the completed state for the day
+      trackerData[day] = Array.from(checkboxes).map(cb => cb.checked);
       updateLocalStorage();
       updateProgress();
     }
 
+    // Load state from localStorage when the page is loaded
+    function loadSavedData() {
+      const allDays = document.querySelectorAll('.day-box');
+      allDays.forEach((dayBox, index) => {
+        const day = 'day' + index;
+        const savedState = trackerData[day];
+        if (savedState) {
+          const checkboxes = dayBox.querySelectorAll('input[type="checkbox"]');
+          savedState.forEach((checked, i) => {
+            checkboxes[i].checked = checked;
+          });
+        }
+        updateDayCompletion(dayBox, day); // Update completion state for this day
+      });
+    }
+
+    // Create the 90 days boxes
     for (let i = 0; i < 90; i++) {
       let date = new Date();
       date.setDate(date.getDate() + i + 1);
@@ -113,7 +132,7 @@
       if (dayName === 'Sun') dayBox.classList.add('sunday');
       dayBox.innerHTML = `<div>${dayName}, ${formattedDate}</div>`;
       
-      const tasks = ["DSA + Next.js", "Video", "No Fap", "5 AM Wake Up", "Gym", "Diet","Book"];
+      const tasks = ["DSA + Next.js", "Video", "No Fap", "5 AM Wake Up", "Gym", "Diet", "Book"];
       tasks.forEach(task => {
         const taskContainer = document.createElement('div');
         taskContainer.className = 'task';
@@ -127,6 +146,11 @@
       });
       document.getElementById('daysContainer').appendChild(dayBox);
     }
+
+    // Call this function after creating the boxes to load the saved data
+    loadSavedData();
+
+    // Update the progress bar initially
     updateProgress();
   </script>
 </body>
