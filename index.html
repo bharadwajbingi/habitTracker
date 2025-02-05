@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>90 Days Tracker</title>
+  <style>
+    /* Base styles */
+    body {
+      font-family: 'Arial', sans-serif;
+      background: #f7f7f7;
+      margin: 0;
+      padding: 20px;
+      color: #333;
+      text-align: center;
+    }
+
+    h1 {
+      font-size: 28px;
+      margin-bottom: 10px;
+    }
+
+    /* Overall Progress Bar */
+    .overall-progress-container {
+      width: 80%;
+      max-width: 600px;
+      background: #ddd;
+      border-radius: 10px;
+      overflow: hidden;
+      margin: 20px auto;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    }
+
+    .overall-progress-bar {
+      height: 12px;
+      width: 0%;
+      background: linear-gradient(90deg, #4caf50, #1de9b6);
+      transition: width 0.3s ease-in-out;
+    }
+
+    .progress-text {
+      margin-top: 5px;
+      font-size: 16px;
+      font-weight: bold;
+    }
+
+    /* Container for the day boxes */
+    .container {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+      gap: 15px;
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+    /* Day box styling */
+    .day-box {
+      background: #fff;
+      border-radius: 12px;
+      padding: 15px;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+      transition: transform 0.2s, box-shadow 0.2s;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .day-box:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+    }
+
+    /* Progress Bar inside each day box */
+    .progress-bar {
+      height: 6px;
+      width: 0%;
+      background: linear-gradient(90deg, #4caf50, #1de9b6);
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      transition: width 0.3s ease-in-out;
+    }
+
+    /* Completed Day Box */
+    .day-box.completed {
+      background: #e8f5e9;
+      border: 2px solid #4caf50;
+    }
+
+    /* Task styling */
+    .task {
+      display: flex;
+      align-items: center;
+      margin-top: 8px;
+    }
+
+    .task input[type="checkbox"] {
+      margin-right: 8px;
+      transform: scale(1.2);
+      cursor: pointer;
+    }
+
+    /* Label styles */
+    .task label {
+      cursor: pointer;
+      font-size: 14px;
+    }
+
+    /* Blur effect for "no fap" label */
+    .obscure {
+      filter: blur(4px);
+      transition: filter 0.3s;
+    }
+
+    .obscure:hover {
+      filter: blur(0);
+    }
+  </style>
+</head>
+<body>
+  <h1>90 Days Habit Tracker</h1>
+
+  <!-- Overall Progress Bar -->
+  <div class="overall-progress-container">
+    <div class="overall-progress-bar" id="overallProgress"></div>
+  </div>
+  <div class="progress-text" id="progressText">0% Completed</div>
+
+  <div class="container" id="daysContainer">
+    <!-- Day boxes will be generated here -->
+  </div>
+
+  <script>
+    const STORAGE_KEY = 'trackerData';
+    let trackerData = JSON.parse(localStorage.getItem(STORAGE_KEY)) || {};
+
+    const tasks = [
+      { id: "dsa-nextjs", label: "📖 dsa+nextjs" },
+      { id: "video", label: "🎥 video" },
+      { id: "nofap", label: "🔒 no fap", obscure: true },
+      { id: "mrng-wakeup", label: "🌅 5 AM Wake Up" },
+      { id: "gym", label: "🏋️‍♂️ gym" }
+    ];
+
+    const container = document.getElementById('daysContainer');
+    const overallProgressBar = document.getElementById('overallProgress');
+    const progressText = document.getElementById('progressText');
+
+    function updateLocalStorage() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(trackerData));
+    }
+
+    function updateOverallProgress() {
+      let totalTasks = 90 * tasks.length;
+      let completedTasks = 0;
+
+      for (let i = 1; i <= 90; i++) {
+        const dayKey = 'day' + i;
+        if (trackerData[dayKey]) {
+          Object.values(trackerData[dayKey]).forEach(isChecked => {
+            if (isChecked) completedTasks++;
+          });
+        }
+      }
+
+      let percentage = Math.round((completedTasks / totalTasks) * 100);
+      overallProgressBar.style.width = percentage + "%";
+      progressText.textContent = percentage + "% Completed";
+    }
+
+    function updateDayCompletion(dayBox, day) {
+      const checkboxes = dayBox.querySelectorAll('input[type="checkbox"]');
+      const allChecked = Array.from(checkboxes).every(cb => cb.checked);
+      const progressBar = dayBox.querySelector('.progress-bar');
+      const checkedCount = Array.from(checkboxes).filter(cb => cb.checked).length;
+      const progressPercent = (checkedCount / checkboxes.length) * 100;
+
+      progressBar.style.width = progressPercent + "%";
+
+      if (allChecked) {
+        dayBox.classList.add('completed');
+      } else {
+        dayBox.classList.remove('completed');
+      }
+
+      trackerData[day] = trackerData[day] || {};
+      checkboxes.forEach(cb => {
+        trackerData[day][cb.dataset.taskId] = cb.checked;
+      });
+
+      updateLocalStorage();
+      updateOverallProgress();
+    }
+
+    for (let i = 1; i <= 90; i++) {
+      const dayKey = 'day' + i;
+      const dayBox = document.createElement('div');
+      dayBox.className = 'day-box';
+
+      const dayTitle = document.createElement('div');
+      dayTitle.style.fontWeight = "bold";
+      dayTitle.style.marginBottom = "10px";
+      dayTitle.textContent = 'Day ' + i;
+      dayBox.appendChild(dayTitle);
+
+      if (!trackerData[dayKey]) {
+        trackerData[dayKey] = {};
+      }
+
+      tasks.forEach(task => {
+        const taskContainer = document.createElement('div');
+        taskContainer.className = 'task';
+
+        const checkbox = document.createElement('input');
+        checkbox.type = 'checkbox';
+        checkbox.id = dayKey + '-' + task.id;
+        checkbox.dataset.taskId = task.id;
+        if (trackerData[dayKey][task.id]) {
+          checkbox.checked = true;
+        }
+
+        checkbox.addEventListener('change', () => updateDayCompletion(dayBox, dayKey));
+        taskContainer.appendChild(checkbox);
+
+        const label = document.createElement('label');
+        label.htmlFor = checkbox.id;
+        label.textContent = task.label;
+        if (task.obscure) {
+          label.classList.add('obscure');
+        }
+        taskContainer.appendChild(label);
+
+        dayBox.appendChild(taskContainer);
+      });
+
+      const progressBar = document.createElement('div');
+      progressBar.className = 'progress-bar';
+      dayBox.appendChild(progressBar);
+
+      updateDayCompletion(dayBox, dayKey);
+      container.appendChild(dayBox);
+    }
+
+    updateOverallProgress();
+  </script>
+</body>
+</html>
