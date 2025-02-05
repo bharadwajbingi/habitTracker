@@ -53,23 +53,6 @@
     .day-box.completed {
       background: #27ae60;
     }
-    .circle-progress {
-      position: absolute;
-      top: 10px;
-      right: 10px;
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
-      border: 3px solid #ddd;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: #e0e0e0;
-    }
-    .day-box.completed .circle-progress {
-      background: #76ff03;
-      color: black;
-    }
     .task {
       display: flex;
       align-items: center;
@@ -113,10 +96,8 @@
     function updateDayCompletion(dayBox, day) {
       const checkboxes = dayBox.querySelectorAll('input[type="checkbox"]');
       const completedTasks = Array.from(checkboxes).filter(cb => cb.checked).length;
-      const progressPercent = Math.round((completedTasks / checkboxes.length) * 100);
-      const progressCircle = dayBox.querySelector('.circle-progress');
-      progressCircle.textContent = `${progressPercent}%`;
       dayBox.classList.toggle('completed', completedTasks === checkboxes.length);
+      trackerData[day] = completedTasks === checkboxes.length;
       updateLocalStorage();
       updateProgress();
     }
@@ -130,13 +111,13 @@
       const dayBox = document.createElement('div');
       dayBox.className = 'day-box';
       if (dayName === 'Sun') dayBox.classList.add('sunday');
-      dayBox.innerHTML = `<div>${dayName}, ${formattedDate}</div><div class="circle-progress">0%</div>`;
+      dayBox.innerHTML = `<div>${dayName}, ${formattedDate}</div>`;
       
       const tasks = ["DSA + Next.js", "Video", "No Fap", "5 AM Wake Up", "Gym", "Diet","Book"];
       tasks.forEach(task => {
         const taskContainer = document.createElement('div');
         taskContainer.className = 'task';
-        taskContainer.innerHTML = `<input type="checkbox"> <label ${task === "No Fap" ? "class='obscure'" : ""}>${task}</label>`;
+        taskContainer.innerHTML = `<input type="checkbox" id="task${i}-${task}"> <label ${task === "No Fap" ? "class='obscure'" : ""}>${task}</label>`;
         taskContainer.addEventListener('click', () => {
           const checkbox = taskContainer.querySelector('input');
           checkbox.checked = !checkbox.checked;
