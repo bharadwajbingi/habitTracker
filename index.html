@@ -131,12 +131,13 @@
       dayBox.className = 'day-box';
       if (dayName === 'Sun') dayBox.classList.add('sunday');
       dayBox.innerHTML = `<div>${dayName}, ${formattedDate}</div>`;
-      
-      const tasks = ["DSA + Next.js", "Video", "No Fap", "5 AM Wake Up", "Gym", "Diet", "Book"];
+
+      // Removed "No Fap" from task list here
+      const tasks = ["DSA + Next.js", "Video", "5 AM Wake Up", "Gym", "Diet", "Book"];
       tasks.forEach(task => {
         const taskContainer = document.createElement('div');
         taskContainer.className = 'task';
-        taskContainer.innerHTML = `<input type="checkbox" id="task${i}-${task}"> <label ${task === "No Fap" ? "class='obscure'" : ""}>${task}</label>`;
+        taskContainer.innerHTML = `<input type="checkbox" id="task${i}-${task}"> <label>${task}</label>`;
         taskContainer.addEventListener('click', () => {
           const checkbox = taskContainer.querySelector('input');
           checkbox.checked = !checkbox.checked;
